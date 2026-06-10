@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Fiscal de Transportes</title>
+    <style>
+        :root {
+            --primary-color: #2b6cb0;
+            --primary-hover: #2c5282;
+            --bg-color: #f7fafc;
+            --card-bg: #ffffff;
+            --text-color: #2d3748;
+            --border-color: #e2e8f0;
+            --success-color: #48bb78;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--primary-color);
+            font-size: 24px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #718096;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            margin-bottom: -2px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .input-group {
+            display: flex;
+            position: relative;
+        }
+
+        .input-group-addon {
+            background: #edf2f7;
+            border: 1px solid var(--border-color);
+            border-right: none;
+            padding: 10px 12px;
+            border-radius: 6px 0 0 6px;
+            font-size: 14px;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .input-group input {
+            border-radius: 0 6px 6px 0;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+        }
+
+        button.btn-calc {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+        button.btn-calc:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .result-box {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #f8fafc;
+            border-left: 4px solid var(--primary-color);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .result-box-cte {
+            border-left-color: var(--success-color);
+        }
+
+        .result-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--border-color);
+            font-size: 15px;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+            font-weight: 700;
+            font-size: 17px;
+            margin-top: 5px;
+            color: #1a202c;
+        }
+
+        .highlight-green {
+            color: var(--success-color) !important;
+        }
+        .highlight-red {
+            color: #c53030 !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Calculadora Logística / Fiscal</h1>
+    
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('cte')">Diferença CTe Descarga</button>
+        <button class="tab-btn" onclick="switchTab('grossup')">Gross-Up Avulso</button>
+    </div>
+
+    <div id="cte" class="tab-content active">
+        <div class="form-group">
+            <label for="cte-composicao">Valor da Composição do CTe (Já contém ICMS)</label>
+            <div class="input-group">
+                <span class="input-group-addon">R$</span>
+                <input type="number" id="cte-composicao" placeholder="Ex: 4608.12" step="0.01">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="cte-icms">Alíquota de ICMS da Região (para deduzir do CTe e somar no Pago)</label>
+            <div class="input-group">
+                <input type="number" id="cte-icms" value="12" step="0.1">
+                <span class="input-group-addon">%</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="cte-pago">Valor Pago Real (Líquido - Sem ICMS e Sem PIS/COFINS)</label>
+            <div class="input-group">
+                <span class="input-group-addon">R$</span>
+                <input type="number" id="cte-pago" placeholder="Ex: 3034.12" step="0.01">
+            </div>
+        </div>
+
+        <button class="btn-calc" style="background-color: var(--success-color);" onclick="calcularDiferencaCTe()">Calcular Diferença Real</button>
+
+        <div class="result-box result-box-cte" id="res-cte" style="display: none;">
+            <div class="result-title">Apurativo Fiscal da Diferença</div>
+            <div class="result-row"><span>CTe Bruto Inicial:</span> <span id="c-composicao">R$ 0,00</span></div>
+            <div class="result-row"><span>(-) ICMS Deduzido do CTe:</span> <span id="c-deducao-icms" style="color: #c53030;">R$ 0,00</span></div>
+            <div class="result-row"><span>(=) CTe Líquido:</span> <span id="c-cte-liquido">R$ 0,00</span></div>
+            <hr style="margin: 10px 0; border: none; border-top: 1px solid var(--border-color);">
+            <div class="result-row"><span>Valor Pago Informado (Líquido):</span> <span id="c-pago-original">R$ 0,00</span></div>
+            <div class="result-row"><span>(+) Gross-up (ICMS + PIS/COFINS embutidos):</span> <span id="c-pago-impostos" style="color: var(--primary-color);">R$ 0,00</span></div>
+            <div class="result-row"><span>(=) Valor Pago Convertido em Bruto:</span> <span id="c-pago-bruto">R$ 0,00</span></div>
+            <hr style="margin: 10px 0; border: none; border-top: 1px solid var(--border-color);">
+            <div class="result-row"><span>Diferença Bruta a Cobrar do Cliente:</span> <span id="c-diferenca" class="highlight-green">R$ 0,00</span></div>
+        </div>
+    </div>
+
+    <div id="grossup" class="tab-content">
+        <div class="form-group">
+            <label for="val-liq">Valor Líquido Desejado</label>
+            <div class="input-group">
+                <span class="input-group-addon">R$</span>
+                <input type="number" id="val-liq" placeholder="Ex: 650.00" step="0.01">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="icms-rate">Alíquota de ICMS (%)</label>
+            <div class="input-group">
+                <input type="number" id="icms-rate" value="12" step="0.1">
+                <span class="input-group-addon">%</span>
+            </div>
+        </div>
+
+        <button class="btn-calc" onclick="calcularGrossUp()">Calcular Valor Bruto</button>
+
+        <div class="result-box" id="res-grossup" style="display: none;">
+            <div class="result-title">Resultados Gross-Up</div>
+            <div class="result-row"><span>Valor Bruto Calculado:</span> <span id="r-bruto" style="color: var(--primary-color); font-weight: bold;">R$ 0,00</span></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    function formatarMoeda(valor) {
+        return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function calcularDiferencaCTe() {
+        const cteBruto = parseFloat(document.getElementById('cte-composicao').value);
+        const icmsPorcentagem = parseFloat(document.getElementById('cte-icms').value);
+        const pagoLiquido = parseFloat(document.getElementById('cte-pago').value);
+        const pisCofinsPorcentagem = 9.25; 
+
+        if (isNaN(cteBruto) || isNaN(pagoLiquido)) {
+            alert("Por favor, preencha o valor do CTe e o valor pago.");
+            return;
+        }
+
+        // 1. Deduzir o ICMS do CTe Bruto para achar o CTe Líquido
+        const valorIcmsDeducao = cteBruto * (icmsPorcentagem / 100);
+        const cteLiquido = cteBruto - valorIcmsDeducao;
+
+        // 2. Pegar o Valor Pago Líquido e acrescentar os impostos (Gross-up)
+        const fatorPC = 1 - (pisCofinsPorcentagem / 100); // 0.9075
+        const FatorIcms = 1 - (icmsPorcentagem / 100);    // Ex: 0.88
+        
+        const pagoBruto = (pagoLiquido / fatorPC) / FatorIcms;
+        const totalImpostosAcrescentados = pagoBruto - pagoLiquido;
+
+        // 3. Calcular a diferença real (Bruto do CTe - Bruto que foi pago)
+        const diferencaACobrar = cteBruto - pagoBruto;
+
+        // Preencher a tela com o passo a passo fiscal
+        document.getElementById('c-composicao').innerText = formatarMoeda(cteBruto);
+        document.getElementById('c-deducao-icms').innerText = "- " + formatarMoeda(valorIcmsDeducao);
+        document.getElementById('c-cte-liquido').innerText = formatarMoeda(cteLiquido);
+        
+        document.getElementById('c-pago-original').innerText = formatarMoeda(pagoLiquido);
+        document.getElementById('c-pago-impostos').innerText = "+ " + formatarMoeda(totalImpostosAcrescentados);
+        document.getElementById('c-pago-bruto').innerText = formatarMoeda(pagoBruto);
+        
+        const elementoDiferenca = document.getElementById('c-diferenca');
+        elementoDiferenca.innerText = formatarMoeda(diferencaACobrar);
+
+        if (diferencaACobrar < 0) {
+            elementoDiferenca.className = "highlight-red";
+        } else {
+            elementoDiferenca.className = "highlight-green";
+        }
+
+        document.getElementById('res-cte').style.display = 'block';
+    }
+
+    function calcularGrossUp() {
+        const valLiq = parseFloat(document.getElementById('val-liq').value);
+        const icmsPorcentagem = parseFloat(document.getElementById('icms-rate').value);
+        const pisCofinsPorcentagem = 9.25;
+
+        if (isNaN(valLiq) || valLiq <= 0) {
+            alert("Por favor, insira um valor líquido válido.");
+            return;
+        }
+
+        const fatorPC = 1 - (pisCofinsPorcentagem / 100);
+        const FatorIcms = 1 - (icmsPorcentagem / 100);
+        const valorBrutoFinal = (valLiq / fatorPC) / FatorIcms;
+
+        document.getElementById('r-bruto').innerText = formatarMoeda(valorBrutoFinal);
+        document.getElementById('res-grossup').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
